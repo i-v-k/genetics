@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Build
+dist/
+build/
+.next/
+.swc/
+
+# IDE
+.idea/
+
+# Cache
+.cache/
+.webpack/
+
+# Tests
+coverage/
+
+# RSA keys
+rsa/
+
+# Lingui
+locales/*.ts
+
+# Config files with sensitive data
+.env
+.env.*
+.env.test
+
+# Logs
+logs/
+*.log
+*.tmp
+.DS_Store
+npm-debug.log*
+
+# TypeScript cache
+*.tsbuildinfo
+
+# VSCode
+.vscode
+.vscode-test
+

@@ -1,0 +1,103 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.css", "**/*.json"],
+    "ignore": [".next", "coverage", "locales", "public", "libs/vendor", "dist"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noAutofocus": "off",
+        "useKeyWithClickEvents": "off"
+      },
+      "complexity": {
+        "noForEach": "off",
+        "noUselessStringConcat": "error",
+        "noVoid": "error",
+        "useDateNow": "error",
+        "useSimplifiedLogicExpression": "error"
+      },
+      "correctness": {
+        "noConstantMathMinMaxClamp": "error",
+        "noUndeclaredDependencies": "error",
+        "noUnknownMediaFeatureName": "off",
+        "noUnusedFunctionParameters": "error",
+        "noUnusedImports": "error",
+        "noUnusedPrivateClassMembers": "error",
+        "noUnusedVariables": "error",
+        "useArrayLiterals": "error",
+        "useHookAtTopLevel": "error"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
+      },
+      "style": {
+        "noDoneCallback": "error",
+        "noNamespace": "error",
+        "noShoutyConstants": "error",
+        "noYodaExpression": "error",
+        "useBlockStatements": "error",
+        "useCollapsedElseIf": "error",
+        "useConsistentArrayType": "error",
+        "useConsistentBuiltinInstantiation": "error",
+        "useExplicitLengthCheck": "error",
+        "useFilenamingConvention": {
+          "level": "error",
+          "options": {
+            "filenameCases": ["kebab-case"]
+          }
+        },
+        "useForOf": "error",
+        "useFragmentSyntax": "error",
+        "useNodeAssertStrict": "error",
+        "useShorthandAssign": "error",
+        "useThrowNewError": "error",
+        "useThrowOnlyError": "error"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noConsole": "error",
+        "noEmptyBlockStatements": "error",
+        "noEvolvingTypes": "error",
+        "noMisplacedAssertion": "error",
+        "noSkippedTests": "error",
+        "useAwait": "error",
+        "useErrorMessage": "error",
+        "useNumberToFixedDigitsArgument": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 90
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
+    }
+  },
+  "css": {
+    "parser": {
+      "cssModules": true
+    },
+    "formatter": {
+      "quoteStyle": "single"
+    }
+  }
+}

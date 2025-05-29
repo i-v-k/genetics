@@ -1,0 +1,50 @@
+# Build
+build
+.next
+dist
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependency directories
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# dotenv environment variables file
+.env
+.env.test
+
+# VSCode
+.vscode
+.vscode-test
+
+# IDE
+.idea
+
+# Ignore Mac DS_Store files
+.DS_Store
+
+# SWC
+.swc
+
+# Tests
+coverage
+
+# RSA keys
+rsa
+
+# Lingui
+locales/*.ts
+
+# Storybook
+public/storybook
+
+# AI
+.junie/
