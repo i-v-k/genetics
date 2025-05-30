@@ -1,7 +1,6 @@
 # Build
 build
 .next
-dist
 
 # Logs
 logs
