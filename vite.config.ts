@@ -23,7 +23,7 @@ export default defineConfig({
 
   // Build options
   build: {
-    outDir: 'dist',
+    outDir: 'docs',
     emptyOutDir: true,
     sourcemap: true,
   },
