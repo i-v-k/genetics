@@ -94,6 +94,8 @@ export const CSVParser = () => {
   const [error, setError] = useState<string>('')
   const [resultFinal, setResultFinal] = useState<string[][]>([])
 
+  console.log('!!!!!!!!!!!!!! 2')
+
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
@@ -229,8 +231,10 @@ export const CSVParser = () => {
         </div>
       )}
 
+      <p>!!!!!!!!!!!!!!!!!!!!</p>
+
       {resultFinal && resultFinal.length > 0 && (
-        <div className={classes.preview}>
+        <div className={classes.result}>
           <h3>Результаты по клиенту:</h3>
           <table>
             <tbody>
@@ -265,7 +269,7 @@ export const CSVParser = () => {
       {error && <div className={classes.error}>{error}</div>}
 
       {result && (
-        <div className={classes.result}>
+        <div className={classes.searchResult}>
           <h2>Результат: {result}</h2>
         </div>
       )}

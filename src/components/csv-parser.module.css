@@ -1,7 +1,7 @@
 .csvParser {
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 120px;
   font-family: Arial, sans-serif;
 
   & h1 {
@@ -12,6 +12,7 @@
 
 .fileUpload,
 .searchSection,
+.searchResult,
 .result,
 .preview {
   margin-bottom: 30px;
@@ -60,4 +61,10 @@
 
 .csvParser tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+
+@media print {
+  .csvParser {
+    padding: 0;
+  }
 }
