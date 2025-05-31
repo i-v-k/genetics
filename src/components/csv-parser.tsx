@@ -94,8 +94,6 @@ export const CSVParser = () => {
   const [error, setError] = useState<string>('')
   const [resultFinal, setResultFinal] = useState<string[][]>([])
 
-  console.log('!!!!!!!!!!!!!! 2')
-
   const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
@@ -186,7 +184,12 @@ export const CSVParser = () => {
                 ? item.genotypeV3Desc
                 : 'пусто'
 
-        lines.push([item.gene, item.geneName, genotype, matchingGenotype])
+        lines.push([
+          item.gene,
+          `${item.geneName}, ${item.geneDesc.charAt(0).toLowerCase()}${item.geneDesc.slice(1)}`,
+          genotype,
+          matchingGenotype,
+        ])
       } else {
         lines.push([item.gene, item.geneName, 'Не найдено', 'Не найдено'])
       }
@@ -230,8 +233,6 @@ export const CSVParser = () => {
           <p>Всего строк: {csvData.length}</p>
         </div>
       )}
-
-      <p>!!!!!!!!!!!!!!!!!!!!</p>
 
       {resultFinal && resultFinal.length > 0 && (
         <div className={classes.result}>

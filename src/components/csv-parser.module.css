@@ -1,7 +1,7 @@
 .csvParser {
   max-width: 800px;
   margin: 0 auto;
-  padding: 120px;
+  padding: 20px;
   font-family: Arial, sans-serif;
 
   & h1 {
@@ -11,10 +11,11 @@
 }
 
 .fileUpload,
+.preview,
+.result,
 .searchSection,
 .searchResult,
-.result,
-.preview {
+.error {
   margin-bottom: 30px;
   padding: 20px;
   border: 1px solid #ddd;
@@ -66,5 +67,18 @@
 @media print {
   .csvParser {
     padding: 0;
+  }
+
+  .fileUpload,
+  .preview,
+  .searchSection,
+  .searchResult,
+  .error {
+    display: none;
+  }
+
+  .result {
+    padding: 0;
+    border: none;
   }
 }
