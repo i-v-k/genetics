@@ -23,6 +23,12 @@
   background-color: #f9f9f9;
 }
 
+.uploadButtons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
 .csvParser input[type='text'] {
   padding: 8px;
   width: 300px;

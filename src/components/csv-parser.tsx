@@ -15,21 +15,29 @@ interface DataItem {
   genotypeV3Desc: string
 }
 
+const genesMap: Record<string, string[]> = {
+  CC: ['CC', 'GG'],
+  CT: ['CT', 'TC', 'GA', 'AG'],
+  TC: ['TC', 'CT', 'AG', 'GA'],
+  TT: ['TT', 'AA'],
+  GG: ['GG', 'CC'],
+  GA: ['GA', 'AG', 'CT', 'TC'],
+  AG: ['AG', 'GA', 'TC', 'CT'],
+  AA: ['AA', 'TT'],
+}
+
 const data: DataItem[] = [
   {
     gene: 'rs4988235',
     geneName: 'Лактаза',
     geneDesc: 'Расщепляет лактозу до глюкозы и галактозы (молочные продукты).',
     genotypeV1: 'CC',
-    // genotypeV1: 'GG',
     genotypeV1Desc:
       'Активность фермента лактазы снижена на 70–100%, лактазная недостаточность. Рекомендуется безлактозная диета, ограничение молочных продуктов. Иногда возможен прием фермента лактаза. Необходимо принимать на постоянной основе кальций и витамин D3, так как исключаются молочные продукты.',
     genotypeV2: 'CT',
-    // genotypeV2: 'GA',
     genotypeV2Desc:
       'Активность фермента лактазы снижена на 30–50%. Рекомендуется диета с ограничением молочных продуктов. Иногда возможен прием фермент лактаза, а также курс пробиотиков. Необходимо следить за уровнем кальция.',
     genotypeV3: 'TT',
-    // genotypeV3: 'AA',
     genotypeV3Desc: 'Нет мутации в гене фермента лактазы, коррекция не требуется.',
   },
   {
@@ -73,8 +81,8 @@ const data: DataItem[] = [
     genotypeV3Desc:
       'Более высокая активность амилазы. Отлично расщепляются углеводы, быстрее расщепляется крахмал, после крахмалистой пищи ниже гликемический ответ. Коррекция не требуется. ',
   },
-  {
-    gene: 'rs3131972',
+  /*{
+    gene: 'rs7531583',
     geneName: 'Амилаза поджелудочная',
     geneDesc: 'Продолжает расщепление крахмала в кишечнике.',
     genotypeV1: 'GG',
@@ -83,18 +91,20 @@ const data: DataItem[] = [
     genotypeV2Desc: 'Test GA !!!',
     genotypeV3: 'AA',
     genotypeV3Desc: 'Test AA',
-  },
+  },*/
 ]
 
 export const CSVParser = () => {
   const [csvData, setCsvData] = useState<CSVData | null>(null)
+  const [baseData, setBaseData] = useState<CSVData | null>(null)
   const [searchValue, setSearchValue] = useState<string>('')
   const [result, setResult] = useState<string>('')
-  const [fileName, setFileName] = useState<string>('')
+  const [fileName1, setFileName1] = useState<string>('')
+  const [fileName2, setFileName2] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [resultFinal, setResultFinal] = useState<string[][]>([])
 
-  const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload1 = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
 
     if (!file) {
@@ -107,7 +117,7 @@ export const CSVParser = () => {
       return
     }
 
-    setFileName(file.name)
+    setFileName1(file.name)
     setError('')
 
     const reader = new FileReader()
@@ -120,13 +130,45 @@ export const CSVParser = () => {
     reader.readAsText(file)
   }
 
-  const parseCSV = (text: string) => {
+  const handleFileUpload2 = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) {
+      return
+    }
+
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      setError('Пожалуйста, загрузите файл в формате CSV')
+
+      return
+    }
+
+    setFileName2(file.name)
+    setError('')
+
+    const reader = new FileReader()
+
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const text = e.target?.result as string
+      parseCSV(text, false)
+    }
+
+    reader.readAsText(file)
+  }
+
+  const parseCSV = (text: string, isClient = true) => {
     try {
       const lines = text.split('\n')
       const parsedData = lines.map((line) => line.split(',').map((value) => value.trim()))
 
-      setCsvData(parsedData)
-      setResult('')
+      if (isClient) {
+        setCsvData(parsedData)
+        setResult('')
+
+        return
+      }
+
+      setBaseData(parsedData)
     } catch (error) {
       setError('Ошибка при парсинге CSV файла')
       // biome-ignore lint/suspicious/noConsole: <explanation>
@@ -158,11 +200,13 @@ export const CSVParser = () => {
   }
 
   const getData = useCallback((): void => {
-    if (!csvData) {
+    if (!(csvData && baseData)) {
       setError('Пожалуйста, загрузите CSV файл и введите значение для поиска')
 
       return
     }
+
+    // console.log(baseData)
 
     const lines: string[][] = []
 
@@ -173,16 +217,21 @@ export const CSVParser = () => {
 
       if (matchingRow) {
         const genotype = matchingRow?.[3]
-        const matchingGenotype =
-          item.genotypeV1.toLowerCase() === genotype.toLowerCase()
-            ? item.genotypeV1Desc
-            : item.genotypeV2.toLowerCase() === genotype.toLowerCase() ||
-                item.genotypeV2.toLowerCase() ===
-                  [...genotype].reverse().join('').toLowerCase()
-              ? item.genotypeV2Desc
-              : item.genotypeV3.toLowerCase() === genotype.toLowerCase()
-                ? item.genotypeV3Desc
-                : 'пусто'
+        const genesArray = genesMap[genotype]
+
+        let matchingGenotype = ''
+
+        if (genesArray.length > 0) {
+          for (const gene of genesArray) {
+            if (gene === item.genotypeV1) {
+              matchingGenotype = item.genotypeV1Desc
+            } else if (gene === item.genotypeV2) {
+              matchingGenotype = item.genotypeV2Desc
+            } else if (gene === item.genotypeV3) {
+              matchingGenotype = item.genotypeV3Desc
+            }
+          }
+        }
 
         lines.push([
           item.gene,
@@ -195,25 +244,36 @@ export const CSVParser = () => {
       }
     }
 
-    // biome-ignore lint/suspicious/noConsole: <explanation>
-    console.dir(lines, { depth: null })
     setResultFinal(lines)
-  }, [csvData])
+  }, [csvData, baseData])
 
   useEffect(() => {
-    if (csvData === null) {
+    if (baseData === null) {
       return
     }
 
     getData()
-  }, [csvData, getData])
+  }, [baseData, getData])
 
   return (
     <div className={classes.csvParser}>
       <div className={classes.fileUpload}>
         <h2>Шаг 1: Загрузите CSV файл</h2>
-        <input type="file" accept=".csv" onChange={handleFileUpload} />
-        {fileName && <p>Загружен файл: {fileName}</p>}
+        <div className={classes.uploadButtons}>
+          <div>
+            <input type="file" accept=".csv" onChange={handleFileUpload1} />
+            {fileName1 && <p>Данные клиента: {fileName1}</p>}
+          </div>
+          <div>
+            <input
+              type="file"
+              accept=".csv"
+              onChange={handleFileUpload2}
+              disabled={!fileName1}
+            />
+            {fileName2 && <p>База знаний: {fileName2}</p>}
+          </div>
+        </div>
       </div>
 
       {csvData && csvData.length > 0 && (
