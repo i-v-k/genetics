@@ -1,19 +1,8 @@
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
+import * as XLSX from 'xlsx'
 import classes from './csv-parser.module.css'
 
 type CSVData = string[][]
-
-interface DataItem {
-  gene: string
-  geneName: string
-  geneDesc: string
-  genotypeV1: string
-  genotypeV1Desc: string
-  genotypeV2: string
-  genotypeV2Desc: string
-  genotypeV3: string
-  genotypeV3Desc: string
-}
 
 const genesMap: Record<string, string[]> = {
   CC: ['CC', 'GG'],
@@ -25,74 +14,6 @@ const genesMap: Record<string, string[]> = {
   AG: ['AG', 'GA', 'TC', 'CT'],
   AA: ['AA', 'TT'],
 }
-
-const data: DataItem[] = [
-  {
-    gene: 'rs4988235',
-    geneName: 'Лактаза',
-    geneDesc: 'Расщепляет лактозу до глюкозы и галактозы (молочные продукты).',
-    genotypeV1: 'CC',
-    genotypeV1Desc:
-      'Активность фермента лактазы снижена на 70–100%, лактазная недостаточность. Рекомендуется безлактозная диета, ограничение молочных продуктов. Иногда возможен прием фермента лактаза. Необходимо принимать на постоянной основе кальций и витамин D3, так как исключаются молочные продукты.',
-    genotypeV2: 'CT',
-    genotypeV2Desc:
-      'Активность фермента лактазы снижена на 30–50%. Рекомендуется диета с ограничением молочных продуктов. Иногда возможен прием фермент лактаза, а также курс пробиотиков. Необходимо следить за уровнем кальция.',
-    genotypeV3: 'TT',
-    genotypeV3Desc: 'Нет мутации в гене фермента лактазы, коррекция не требуется.',
-  },
-  {
-    gene: 'rs182549',
-    geneName: 'Лактаза',
-    geneDesc: 'Расщепляет лактозу до глюкозы и галактозы (молочные продукты).',
-    genotypeV1: 'CC',
-    genotypeV1Desc:
-      'Активность фермента лактазы снижена на 70%, лактазная недостаточность. Рекомендуется безлактозная диета, ограничение молочных продуктов. Иногда возможен прием фермента лактаза. Необходимо принимать на постоянной основе кальций и витамин D3, так как исключаются молочные продукты.',
-    genotypeV2: 'CT',
-    genotypeV2Desc:
-      'Активность фермента лактазы снижена на 30–50%. Рекомендуется диета с ограничением молочных продуктов. Иногда возможен прием фермент лактаза, а также курс пробиотиков. Необходимо следить за уровнем кальция.',
-    genotypeV3: 'TT',
-    genotypeV3Desc: 'Нет мутации в гене фермента лактазы, коррекция не требуется.',
-  },
-  {
-    gene: 'rs4244372',
-    geneName: 'Амилаза слюны',
-    geneDesc: 'Начинает гидролиз крахмала во рту.',
-    genotypeV1: 'AA',
-    genotypeV1Desc:
-      'Высокая активность амилазы слюны. Ниже концентрация глюкозы в крови после употребления крахмала. Коррекция не требуется.',
-    genotypeV2: 'AT',
-    genotypeV2Desc:
-      'Сниженная активность амилазы слюны. Следить за количеством потребляемых крахмалов, отслеживать реакцию в ЖКТ после употребления. Добавить в рацион больше клетчатки, тщательно пережёвывать, добавить пробиотики.',
-    genotypeV3: 'TT',
-    genotypeV3Desc:
-      'Низкая активность амилазы слюны, зависимостью от жирных кислот для получения энергии. Риск диабета и ожирения. Снизить употребление крахмалов, добавить в рацион больше клетчатки, тщательно пережёвывать. Контроль ГИ, добавить пробиотики.',
-  },
-  {
-    gene: 'rs11185098',
-    geneName: 'Амилаза поджелудочная',
-    geneDesc: 'Продолжает расщепление крахмала в кишечнике.',
-    genotypeV1: 'GG',
-    genotypeV1Desc:
-      'Более низкая активность амилазы, хуже расщипляются углеводы, выше риск гипергликемии, инсулинорезистентности и ожирения при диете с большим количеством крахмала. Необходима снижение углеводов (белый хлеб, рис, картофель), увеличение клетчатки и  жиров. Медленное пережевывание.',
-    genotypeV2: 'GA',
-    genotypeV2Desc:
-      'Промежуточная активность (иногда обозначается как «нормальная»), но необходимо соблюдать баланс - не стоит употреблять завышенное количество углеводов. Коррекция не требуется.',
-    genotypeV3: 'AA',
-    genotypeV3Desc:
-      'Более высокая активность амилазы. Отлично расщепляются углеводы, быстрее расщепляется крахмал, после крахмалистой пищи ниже гликемический ответ. Коррекция не требуется. ',
-  },
-  /*{
-    gene: 'rs7531583',
-    geneName: 'Амилаза поджелудочная',
-    geneDesc: 'Продолжает расщепление крахмала в кишечнике.',
-    genotypeV1: 'GG',
-    genotypeV1Desc: 'Test GG',
-    genotypeV2: 'GA',
-    genotypeV2Desc: 'Test GA !!!',
-    genotypeV3: 'AA',
-    genotypeV3Desc: 'Test AA',
-  },*/
-]
 
 export const CSVParser = () => {
   const [csvData, setCsvData] = useState<CSVData | null>(null)
@@ -137,9 +58,8 @@ export const CSVParser = () => {
       return
     }
 
-    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      setError('Пожалуйста, загрузите файл в формате CSV')
-
+    if (!(file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
+      setError('Пожалуйста, загрузите файл в формате XLSX или XLS')
       return
     }
 
@@ -149,17 +69,46 @@ export const CSVParser = () => {
     const reader = new FileReader()
 
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      const text = e.target?.result as string
-      parseCSV(text, false)
+      try {
+        const arrayBuffer = e.target?.result as ArrayBuffer
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+
+        // Берем первый лист из книги
+        const firstSheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[firstSheetName]
+
+        // Преобразуем в массив массивов
+        const parsedData = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+        }) as string[][]
+
+        // Фильтруем пустые строки
+        const filteredData = parsedData.filter(
+          (row) =>
+            row.length > 0 && row.some((cell) => cell !== undefined && cell !== ''),
+        )
+
+        // Удаляем первую строку (заголовки столбцов)
+        const dataWithoutHeaders = filteredData.slice(1)
+
+        // Устанавливаем данные как базовые (не клиентские)
+        setBaseData(dataWithoutHeaders)
+      } catch (error) {
+        setError('Ошибка при парсинге XLSX файла')
+        // biome-ignore lint/suspicious/noConsole: <explanation>
+        console.error('Parsing error:', error)
+      }
     }
 
-    reader.readAsText(file)
+    reader.readAsArrayBuffer(file)
   }
 
   const parseCSV = (text: string, isClient = true) => {
     try {
       const lines = text.split('\n')
-      const parsedData = lines.map((line) => line.split(',').map((value) => value.trim()))
+      const parsedData = lines
+        .map((line) => line.split(',').map((value) => value.trim()))
+        .filter((row) => row.some((cell) => cell !== '')) // Фильтрация пустых строк
 
       if (isClient) {
         setCsvData(parsedData)
@@ -206,13 +155,26 @@ export const CSVParser = () => {
       return
     }
 
-    // console.log(baseData)
+    // biome-ignore lint/suspicious/noConsole: <explanation>
+    console.log(baseData)
 
     const lines: string[][] = []
 
-    for (const item of data) {
+    for (const item of baseData) {
+      const [
+        gene,
+        geneName,
+        geneDesc,
+        genotypeV1,
+        genotypeV1Desc,
+        genotypeV2,
+        genotypeV2Desc,
+        genotypeV3,
+        genotypeV3Desc,
+      ] = item
+
       const matchingRow = csvData.find(
-        (row) => row.length > 0 && row[0].toLowerCase() === item.gene.toLowerCase(),
+        (row) => row.length > 0 && row[0].toLowerCase() === gene.toLowerCase(),
       )
 
       if (matchingRow) {
@@ -223,24 +185,24 @@ export const CSVParser = () => {
 
         if (genesArray.length > 0) {
           for (const gene of genesArray) {
-            if (gene === item.genotypeV1) {
-              matchingGenotype = item.genotypeV1Desc
-            } else if (gene === item.genotypeV2) {
-              matchingGenotype = item.genotypeV2Desc
-            } else if (gene === item.genotypeV3) {
-              matchingGenotype = item.genotypeV3Desc
+            if (gene === genotypeV1) {
+              matchingGenotype = genotypeV1Desc
+            } else if (gene === genotypeV2) {
+              matchingGenotype = genotypeV2Desc
+            } else if (gene === genotypeV3) {
+              matchingGenotype = genotypeV3Desc
             }
           }
         }
 
         lines.push([
-          item.gene,
-          `${item.geneName}, ${item.geneDesc.charAt(0).toLowerCase()}${item.geneDesc.slice(1)}`,
+          gene,
+          `${geneName}, ${geneDesc.charAt(0).toLowerCase()}${geneDesc.slice(1)}`,
           genotype,
           matchingGenotype,
         ])
       } else {
-        lines.push([item.gene, item.geneName, 'Не найдено', 'Не найдено'])
+        lines.push([gene, geneName, 'Не найдено', 'Не найдено'])
       }
     }
 
@@ -258,16 +220,18 @@ export const CSVParser = () => {
   return (
     <div className={classes.csvParser}>
       <div className={classes.fileUpload}>
-        <h2>Шаг 1: Загрузите CSV файл</h2>
+        <h2>Шаг 1: Загрузите файлы</h2>
         <div className={classes.uploadButtons}>
           <div>
+            <p>Загрузить данные клиента (CSV):</p>
             <input type="file" accept=".csv" onChange={handleFileUpload1} />
             {fileName1 && <p>Данные клиента: {fileName1}</p>}
           </div>
           <div>
+            <p>Загрузить базу знаний (XLSX):</p>
             <input
               type="file"
-              accept=".csv"
+              accept=".xlsx,.xls"
               onChange={handleFileUpload2}
               disabled={!fileName1}
             />
