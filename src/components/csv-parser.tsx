@@ -1,5 +1,7 @@
+import OpenAI from 'openai'
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 import * as XLSX from 'xlsx'
+
 import classes from './csv-parser.module.css'
 
 type CSVData = string[][]
@@ -15,6 +17,15 @@ const genesMap: Record<string, string[]> = {
   AA: ['AA', 'TT'],
 }
 
+const client = new OpenAI({
+  apiKey: '',
+  dangerouslyAllowBrowser: true,
+})
+
+type OpenAIResponse = OpenAI.Responses.Response & {
+  _request_id?: string | null
+}
+
 export const CSVParser = () => {
   const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [baseData, setBaseData] = useState<CSVData | null>(null)
@@ -24,6 +35,7 @@ export const CSVParser = () => {
   const [fileName2, setFileName2] = useState<string>('')
   const [error, setError] = useState<string>('')
   const [resultFinal, setResultFinal] = useState<string[][]>([])
+  const [chatData, setChatData] = useState<OpenAIResponse>()
 
   const handleFileUpload1 = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -148,7 +160,20 @@ export const CSVParser = () => {
     }
   }
 
-  const getData = useCallback((): void => {
+  const chat = useCallback(async (input: string) => {
+    const response = await client.responses.create({
+      model: 'gpt-4.1-nano',
+      // TODO: !!! формат ответа
+      // text: {format: {type: "text"}}
+      instructions:
+        'Ты - самый крутой нутрициолог и диетолог, специалист по питанию и здоровому образу жизни. Я буду показывать тебе таблицы, содержащие генетические данные клиентов, твоя задача - давать подробные и результативные рекомендации для этих клиентов по питанию, образу жизни, восстановлению и поддержанию здоровья. В качестве таблицы ты будешь получать отформатированную строку текста. Символом `|` в строке отделяются строки таблицы, а символом `/` - ячейки внутри каждой строки таблицы.',
+      input,
+    })
+
+    setChatData(response)
+  }, [])
+
+  const getData = useCallback(async () => {
     if (!(csvData && baseData)) {
       setError('Пожалуйста, загрузите CSV файл и введите значение для поиска')
 
@@ -156,7 +181,7 @@ export const CSVParser = () => {
     }
 
     // biome-ignore lint/suspicious/noConsole: <explanation>
-    console.log(baseData)
+    // console.log(baseData)
 
     const lines: string[][] = []
 
@@ -206,8 +231,17 @@ export const CSVParser = () => {
       }
     }
 
+    // biome-ignore lint/suspicious/noConsole: <explanation>
+    console.log(lines)
+
     setResultFinal(lines)
-  }, [csvData, baseData])
+
+    const linesFormatted = lines.map((line) => line.join('/')).join('|')
+
+    console.log(linesFormatted)
+
+    // await chat(linesFormatted)
+  }, [csvData, baseData, chat])
 
   useEffect(() => {
     if (baseData === null) {
@@ -219,6 +253,11 @@ export const CSVParser = () => {
 
   return (
     <div className={classes.csvParser}>
+      <div className={classes.fileUpload}>
+        <h2>Ответ от ChatGPT</h2>
+        {chatData && <div>{chatData.output_text}</div>}
+      </div>
+
       <div className={classes.fileUpload}>
         <h2>Шаг 1: Загрузите файлы</h2>
         <div className={classes.uploadButtons}>
